@@ -1,0 +1,30 @@
+{
+    "name": "elephfront/robo-css-minify",
+    "description": "Robo task to perform minification on your CSS files.",
+    "type": "robo-tasks",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yves P.",
+            "email": "havokinspiration@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.1.0",
+        "consolidation/robo": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Elephfront\\RoboCssMinify\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Elephfront\\RoboCssMinify\\Tests\\": "tests/TestCase",
+            "Elephfront\\RoboCssMinify\\Tests\\Utility\\": "tests/Utility"
+        }
+    }
+}
