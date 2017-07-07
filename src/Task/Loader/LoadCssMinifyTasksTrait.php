@@ -3,7 +3,7 @@ namespace Elephfront\RoboCssMinify\Task\Loader;
 
 use Elephfront\RoboCssMinify\Task\CssMinify;
 
-trait CssMinifyLoader
+trait LoadCssMinifyTasksTrait
 {
     
     /**
