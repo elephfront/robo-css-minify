@@ -37,8 +37,8 @@ class CssMinifyTest extends TestCase
         if (file_exists(TESTS_ROOT . 'app' . DS . 'css' . DS . 'output.css')) {
             unlink(TESTS_ROOT . 'app' . DS . 'css' . DS . 'output.css');
         }
-        if (file_exists(TESTS_ROOT . 'app' . DS . 'css' . DS . 'output-complex.css')) {
-            unlink(TESTS_ROOT . 'app' . DS . 'css' . DS . 'output-complex.css');
+        if (file_exists(TESTS_ROOT . 'app' . DS . 'css' . DS . 'deep' . DS . 'output-complex.css')) {
+            unlink(TESTS_ROOT . 'app' . DS . 'css' . DS . 'deep' . DS . 'output-complex.css');
         }
     }
 
@@ -140,6 +140,42 @@ class CssMinifyTest extends TestCase
             $this->task->logger()->getLogs()[0]
         );
     }
+    
+    /**
+     * Tests that the task returns an error in case the file can not be written if normal mode
+     *
+     * @return void
+     */
+    public function testImportError()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task = $this->getMockBuilder(CssMinify::class)
+            ->setMethods(['writeFile'])
+            ->getMock();
+        $this->task->setLogger(new MemoryLogger());
+
+        $this->task->method('writeFile')
+            ->willReturn(false);
+
+        $data = new Data();
+        $data->mergeData([
+            $basePath . 'simple.css' => [
+                'css' => "body {\n\tbackground-color: red;\n}",
+                'destination' => $basePath . 'output.css'
+            ]
+        ]);
+        $this->task->receiveState($data);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_ERROR, $result->getExitCode());
+
+        $log = 'An error occurred while writing the destination file for source file `' . $basePath . 'simple.css`';
+        $this->assertEquals(
+            $log,
+            $result->getMessage()
+        );
+    }
 
     /**
      * Test a basic import using the chained state.
@@ -184,7 +220,7 @@ class CssMinifyTest extends TestCase
         $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
         $desinationsMap = [
             $basePath . 'simple.css' => $basePath . 'output.css',
-            $basePath . 'more-complex.css' => $basePath . 'output-complex.css'
+            $basePath . 'more-complex.css' => $basePath . 'deep' . DS . 'output-complex.css'
         ];
 
         $comparisonsMap = [
@@ -216,7 +252,7 @@ class CssMinifyTest extends TestCase
         );
 
         $source = TESTS_ROOT . 'app' . DS . 'css' . DS . 'more-complex.css';
-        $destination = TESTS_ROOT . 'app' . DS . 'css' . DS . 'output-complex.css';
+        $destination = TESTS_ROOT . 'app' . DS . 'css' . DS . 'deep' . DS . 'output-complex.css';
         $expectedLog = $sentenceStart . ' <info>' . $source . '</info> to <info>' . $destination . '</info>';
         $this->assertEquals(
             $expectedLog,
