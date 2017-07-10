@@ -47,6 +47,23 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     protected $returnData = [];
 
     /**
+     * Whether or not the destination file should be written after the replace have been done.
+     *
+     * @var bool
+     */
+    protected $writeFile = true;
+
+    /**
+     * Disables the `writeFile` property
+     *
+     * @return void
+     */
+    public function disableWriteFile()
+    {
+        $this->writeFile = false;
+    }
+
+    /**
      * Constructor. Will bind the destinations map.
      *
      * @param array $destinationsMap Key / value pairs array where the key is the source and the value the destination.
@@ -87,7 +104,14 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
                 );
             }
 
-            $exec = $this->processDestinationsMap($this->destinationsMap);
+            try {
+                $exec = $this->processDestinationsMap($this->destinationsMap);
+            } catch (InvalidArgumentException $e) {
+                return Result::error(
+                    $this,
+                    $e->getMessage()
+                );
+            }
         }
 
         if ($exec !== true) {
@@ -102,6 +126,24 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     }
 
     /**
+     * Write the `$destination` file with the css content passed in `$css`
+     *
+     * @param string $destination Path of the destination file to write in
+     * @param string $css CSS content to write into the file
+     * @return int Number of bytes written or false on failure.
+     */
+    public function writeFile($destination, $css)
+    {
+        $destinationDirectory = dirname($destination);
+
+        if (!is_dir($destinationDirectory)) {
+            mkdir($destinationDirectory, 0755, true);
+        }
+
+        return file_put_contents($destination, $css);
+    }
+
+    /**
      * Execute the CSSMinify if we are dealing with a source maps (key = source file / value = destination)
      *
      * @param array $destinationsMap List of the destinations files mapped by the sources name. One source equals one
@@ -112,6 +154,10 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     {
         $exec = true;
         foreach ($destinationsMap as $source => $destination) {
+            if (!file_exists($source)) {
+                throw new InvalidArgumentException(sprintf('Impossible to find source file `%s`', $source));
+            }
+            
             $this->minifier = new CSS();
             $this->minifier->add($source);
             $exec = $this->execMinify($source, $destination);
@@ -170,22 +216,26 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
             mkdir($destinationDirectory, 0755, true);
         }
 
-        try {
-            $css = $this->minifier->minify($destination);
+        $css = $this->minifier->minify();
+        
+        $successMessage = sprintf('Minified CSS from <info>%s</info>', $source);
 
-            $this->printTaskSuccess(
-                sprintf(
-                    'Minified CSS from <info>%s</info> to <info>%s</info>',
-                    $source,
-                    $destination
-                )
+        if ($this->writeFile) {
+            if (!$this->writeFile($destination, $css)) {
+                $error = $source;
+                return $error;
+            }
+            
+            $successMessage = sprintf(
+                'Minified CSS from <info>%s</info> to <info>%s</info>',
+                $source,
+                $destination
             );
-
-            $this->returnData[$source] = ['css' => $css, 'destination' => $destination];
-        } catch (\Exception $e) {
-            $error = $e->getMessage();
-            return $error;
         }
+
+        $this->printTaskSuccess($successMessage);
+
+        $this->returnData[$source] = ['css' => $css, 'destination' => $destination];
 
         return true;
     }

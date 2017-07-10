@@ -1,5 +1,5 @@
 <?php
-namespace Elephfront\RoboImportJs\Tests\Utility;
+namespace Elephfront\RoboCssMinify\Tests\Utility;
 
 use Psr\Log\AbstractLogger;
 
