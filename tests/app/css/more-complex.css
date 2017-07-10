@@ -1,0 +1,7 @@
+body {
+    background-color: red
+}
+
+ul > li > a {
+    color: #2ca02c;
+}
