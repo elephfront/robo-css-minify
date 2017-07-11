@@ -51,6 +51,37 @@ class RoboFile extends Tasks
 
 The only argument the `taskCssMinify()` takes is an array (`$destinationsMap`) which maps the source files to the destination files : it will load the **assets/css/main.css**, do its magic and put the final content in **assets/min/main.min.js** and do the same for all of the other files.
 
+## GZIP compression
+
+In addition to minifying your files, you can gzip them. You can enable gzip using the `enableGzip()` method :
+
+```php
+    $this
+        ->taskCssMinify([
+            'assets/css/main.css' => 'assets/min/css/main.min.css',
+            'assets/css/home.css' => 'assets/min/css/home.min.css',
+        ])
+        ->enableGzip()
+        ->run();
+```
+
+By default, files will be compressed using the maximum level (which is 9). You can customize the compression level using the method `setGzipLevel()` :
+
+```php
+    $this
+        ->taskCssMinify([
+            'assets/css/main.css' => 'assets/min/css/main.min.css',
+            'assets/css/home.css' => 'assets/min/css/home.min.css',
+        ])
+        ->enableGzip()
+        ->setGzipLevel(5)
+        ->run();
+```
+
+The `setGzipLevel` accepts values from `-1` to `9`. If you use `-1`, the default compression level of the zlib library will be used.
+`0` means you do not want any compression and `9` is the maximum level of compression.
+If you use a value that is out of these bounds, the maximum compression level will be used.
+
 ## Chained State support
 
 Robo includes a concept called the [Chained State](http://robo.li/collections/#chained-state) that allows tasks that need to work together to be executed in a sequence and pass the state of the execution of a task to the next one.

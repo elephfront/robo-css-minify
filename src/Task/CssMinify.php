@@ -103,13 +103,18 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     }
 
     /**
-     * Enables the `withGzip` property
+     * Set the level of compression to use when using the `gzip` option.
+     * Value should be between -1 and 9. If you use a value that is out of these bounds, will default to 9.
      *
      * @param int $level Level of gzip compression
      * @return self
      */
     public function setGzipLevel(int $level)
     {
+        if ($level < -1 || $level > 9) {
+            $level = 9;
+        }
+        
         $this->gzipLevel = $level;
 
         return $this;

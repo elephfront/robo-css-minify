@@ -151,6 +151,39 @@ class CssMinifyTest extends TestCase
      *
      * @return void
      */
+    public function testBasicMinificationWithGzipAndOutOfBoundsLevel()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'simple.css' => $basePath . 'output.css'
+            ])
+            ->enableGzip()
+            ->setGzipLevel(50);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'simple.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification (with a set source map)
+     *
+     * @return void
+     */
     public function testBasicMinificationWithGzipAndCustomLevel()
     {
         $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
