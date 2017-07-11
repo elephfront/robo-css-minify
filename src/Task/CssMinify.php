@@ -173,7 +173,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      * @param string $css CSS content to write into the file
      * @return int Number of bytes written or false on failure.
      */
-    public function writeFile($destination, $css)
+    public function writeFile(string $destination, string $css)
     {
         $destinationDirectory = dirname($destination);
 
@@ -191,7 +191,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      * destination.
      * @return bool|string True if everything went ok, error otherwise.
      */
-    protected function processDestinationsMap($destinationsMap)
+    protected function processDestinationsMap(array $destinationsMap)
     {
         $exec = true;
         foreach ($destinationsMap as $source => $destination) {
@@ -221,7 +221,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      * - *destination* : the destination of the processed content.
      * @return bool|string True if everything went ok, error otherwise.
      */
-    protected function processInlineData($data)
+    protected function processInlineData(array $data)
     {
         $exec = true;
         foreach ($data as $source => $content) {
@@ -249,7 +249,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      * @param string $destination Path of the destination file.
      * @return bool|string True if everything went ok, false if an error occurred.
      */
-    protected function execMinify($source, $destination)
+    protected function execMinify(string $source, string $destination)
     {
         $destinationDirectory = dirname($destination);
 
