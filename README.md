@@ -1,7 +1,5 @@
 # Robo CSS Minify
 
-⚠ This repository is under development. Use it at your own risks.
-
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?branch=master)](LICENSE.txt)
 [![Build Status](https://travis-ci.org/elephfront/robo-css-minify.svg?branch=master)](https://travis-ci.org/elephfront/robo-css-minify)
 [![Codecov](https://img.shields.io/codecov/c/github/elephfront/robo-css-minify.svg)](https://github.com/elephfront/robo-css-minify)
