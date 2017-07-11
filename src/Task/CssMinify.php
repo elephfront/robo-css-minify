@@ -54,14 +54,18 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     protected $writeFile = true;
 
     /**
-     * Disables the `writeFile` property
+     * Whether or not the destination file should be minify AND 'gzipper'
      *
-     * @return void
+     * @var bool
      */
-    public function disableWriteFile()
-    {
-        $this->writeFile = false;
-    }
+    protected $withGzip = false;
+
+    /**
+     * Gzip level to apply when using the Gzip mode
+     *
+     * @var int
+     */
+    protected $gzipLevel = 9;
 
     /**
      * Constructor. Will bind the destinations map.
@@ -71,6 +75,43 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     public function __construct(array $destinationsMap = [])
     {
         $this->setDestinationsMap($destinationsMap);
+    }
+
+    /**
+     * Disables the `writeFile` property
+     *
+     * @return self
+     */
+    public function disableWriteFile()
+    {
+        $this->writeFile = false;
+        
+        return $this;
+    }
+
+    /**
+     * Enables the `withGzip` property
+     *
+     * @return self
+     */
+    public function enableGzip()
+    {
+        $this->withGzip = true;
+
+        return $this;
+    }
+
+    /**
+     * Enables the `withGzip` property
+     *
+     * @param int $level Level of gzip compression
+     * @return self
+     */
+    public function setGzipLevel(int $level)
+    {
+        $this->gzipLevel = $level;
+
+        return $this;
     }
 
     /**
@@ -216,8 +257,12 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
             mkdir($destinationDirectory, 0755, true);
         }
 
-        $css = $this->minifier->minify();
-        
+        if ($this->withGzip) {
+            $css = $this->minifier->gzip(null, $this->gzipLevel);
+        } else {
+            $css = $this->minifier->minify();
+        }
+
         $successMessage = sprintf('Minified CSS from <info>%s</info>', $source);
 
         if ($this->writeFile) {

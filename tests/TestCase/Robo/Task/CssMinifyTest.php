@@ -115,6 +115,71 @@ class CssMinifyTest extends TestCase
     }
 
     /**
+     * Test a basic minification (with a set source map)
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithGzip()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'simple.css' => $basePath . 'output.css'
+            ])
+            ->enableGzip();
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'simple.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification (with a set source map)
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithGzipAndCustomLevel()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'simple.css' => $basePath . 'output.css'
+            ])
+            ->enableGzip()
+            ->setGzipLevel(5);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'simple.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
      * Test an import with the writeFile feature disabled.
      *
      * @return void
@@ -130,7 +195,7 @@ class CssMinifyTest extends TestCase
 
         $this->assertInstanceOf(Result::class, $result);
         $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
-        
+
         $this->assertFalse(file_exists($basePath . 'output.css'));
 
         $source = $basePath . 'simple.css';
@@ -140,7 +205,7 @@ class CssMinifyTest extends TestCase
             $this->task->logger()->getLogs()[0]
         );
     }
-    
+
     /**
      * Tests that the task returns an error in case the file can not be written if normal mode
      *
@@ -197,7 +262,7 @@ class CssMinifyTest extends TestCase
 
         $this->assertInstanceOf(Result::class, $result);
         $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
-        
+
         $resultData = $result->getData();
         $expected = [
             $basePath . 'simple.css' => [
