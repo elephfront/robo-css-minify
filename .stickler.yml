@@ -3,4 +3,4 @@ linters:
     standard: PSR2
     extensions: '.php'
   csslint:
-    enabled: false
+    enable: false
