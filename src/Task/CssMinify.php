@@ -69,6 +69,49 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     protected $gzipLevel = 9;
 
     /**
+     * Maximum file size (in kB) of file that will be embedded in the generated CSS content
+     *
+     * @var int
+     */
+    protected $maxImportSize = 5;
+
+    /**
+     * List of file extensions that should be imported when the CSS is minified.
+     *
+     * @var array
+     */
+    protected $importExtensions = [
+        'gif',
+        'png',
+        'jpe',
+        'jpg',
+        'jpeg',
+        'svg',
+        'woff',
+        'tif',
+        'tiff',
+        'xbm',
+    ];
+
+    /**
+     * Mime types associated to extensions that should be imported when the CSS is minified.
+     *
+     * @var array
+     */
+    protected $importExtensionsMimeTypes = [
+        'gif' => 'data:image/gif',
+        'png' => 'data:image/png',
+        'jpe' => 'data:image/jpeg',
+        'jpg' => 'data:image/jpeg',
+        'jpeg' => 'data:image/jpeg',
+        'svg' => 'data:image/svg+xml',
+        'woff' => 'data:application/x-font-woff',
+        'tif' => 'image/tiff',
+        'tiff' => 'image/tiff',
+        'xbm' => 'image/x-xbitmap',
+    ];
+
+    /**
      * Constructor. Will bind the destinations map.
      *
      * @param array $destinationsMap Key / value pairs array where the key is the source and the value the destination.
@@ -98,6 +141,45 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     public function enableGzip()
     {
         $this->withGzip = true;
+
+        return $this;
+    }
+
+    /**
+     * Set the maximum file size (in kB) of file that will be embedded in the generated CSS content.
+     * Expects a positive integer. If a negative value is passed, the default of '5' will be applied.
+     * 
+     * @param int $size The maximum file size (in kB) of file that will be embedded in the generated CSS content
+     * @return self 
+     */
+    public function setMaxImportSize(int $size)
+    {
+        if ($size < 0) {
+            $size = 5;
+        }
+        
+        $this->maxImportSize = $size;
+        
+        return $this;
+    }
+
+    /**
+     *
+     * @param array $extensions List of extensions to allow to be imported
+     * @return static
+     */
+    public function setImportExtensions(array $extensions)
+    {
+        foreach ($extensions as $extension) {
+            if (!isset($this->importExtensionsMimeTypes[$extension])) {
+                $message = 'Unsupported file extension `%s`. Supported file extensions are `%s`';
+                throw new InvalidArgumentException(
+                    sprintf($message, $extension, implode(array_keys($this->importExtensionsMimeTypes), ', '))
+                );
+            }
+        }
+
+        $this->importExtensions = $extensions;
 
         return $this;
     }
@@ -263,6 +345,9 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
             mkdir($destinationDirectory, 0755, true);
         }
 
+        $this->minifier->setMaxImportSize($this->maxImportSize);
+        $this->minifier->setImportExtensions($this->compileImportExtensions());
+
         if ($this->withGzip) {
             $css = $this->minifier->gzip(null, $this->gzipLevel);
         } else {
@@ -289,6 +374,22 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
         $this->returnData[$source] = ['css' => $css, 'destination' => $destination];
 
         return true;
+    }
+
+    /**
+     * Compiles the file extensions to import to the format the minifier class is expecting.
+     *
+     * @return array Properly formatted extensions list.
+     */
+    protected function compileImportExtensions()
+    {
+        $extensions = [];
+
+        foreach ($this->importExtensions as $extension) {
+            $extensions[$extension] = $this->importExtensionsMimeTypes[$extension];
+        }
+
+        return $extensions;
     }
 
     /**
