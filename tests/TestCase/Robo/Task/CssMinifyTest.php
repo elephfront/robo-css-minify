@@ -277,7 +277,8 @@ class CssMinifyTest extends TestCase
     }
 
     /**
-     * Test a basic minification with embedded file in the result file with a limit in the import size.
+     * Test a basic minification with embedded file in the result file with a negative value in the limit size will use
+     * the default.
      *
      * @return void
      */
@@ -338,6 +339,25 @@ class CssMinifyTest extends TestCase
             $expectedLog,
             $this->task->logger()->getLogs()[0]
         );
+    }
+
+    /**
+     * Test that specifying an unsupported extension will throw an exception
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Unsupported file extension `zip`. Supported file extensions are `gif, png, jpe, jpg,
+     * jpeg, svg, woff, tif, tiff, xbm`
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesWithUnsupportedExtensions()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setImportExtensions(['zip']);
+        $this->task->run();
     }
 
     /**
