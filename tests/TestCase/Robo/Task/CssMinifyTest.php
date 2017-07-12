@@ -1,4 +1,14 @@
 <?php
+/**
+ * Copyright (c) Yves Piquel (http://www.havokinspiration.fr)
+ *
+ * Licensed under The MIT License
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright     Copyright (c) Yves Piquel (http://www.havokinspiration.fr)
+ * @link          http://github.com/elephfront/robo-css-minify
+ * @license       http://www.opensource.org/licenses/mit-license.php MIT License
+ */
 namespace Elephfront\RoboCssMinify\Tests;
 
 use Elephfront\RoboCssMinify\Task\CssMinify;
@@ -115,7 +125,7 @@ class CssMinifyTest extends TestCase
     }
 
     /**
-     * Test a basic minification (with a set source map)
+     * Test a basic minification with GZIP compression enabled
      *
      * @return void
      */
@@ -147,7 +157,8 @@ class CssMinifyTest extends TestCase
     }
 
     /**
-     * Test a basic minification (with a set source map)
+     * Test a basic minification with GZIP compression enabled but an out of bound limit (will lead to the default value
+     * 9 to be used)
      *
      * @return void
      */
@@ -204,6 +215,186 @@ class CssMinifyTest extends TestCase
         );
 
         $source = $basePath . 'simple.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification with embedded file in the result file.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFiles()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ]);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification with embedded file in the result file with a limit in the import size.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesLimitSize()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setMaxImportSize(10);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification with embedded file in the result file with a negative value in the limit size will use
+     * the default.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesLimitSizeWithNegative()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setMaxImportSize(-15);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . 'testBasicMinificationWithImportedFiles.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test a basic minification with embedded files in the result but with specific extensions provided.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesWithSpecificExtensions()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setImportExtensions(['jpg']);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
+     * Test that specifying an unsupported extension will throw an exception
+     *
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessage Unsupported file extension `zip`. Supported file extensions are `gif, png, jpe, jpg,
+     * jpeg, svg, woff, tif, tiff, xbm`
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesWithUnsupportedExtensions()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setImportExtensions(['zip']);
+        $this->task->run();
+    }
+
+    /**
+     * Test a basic minification with embedded files in the result but with specific extensions provided.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesLimitSizeAndExtensions()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setImportExtensions(['jpg'])
+            ->setMaxImportSize(10);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . __FUNCTION__ . '.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
         $dest = $basePath . 'output.css';
         $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
         $this->assertEquals(
