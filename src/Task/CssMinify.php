@@ -73,7 +73,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      *
      * @var int
      */
-    protected $maxImportSize = 5;
+    protected $maxImportSize = 0;
 
     /**
      * List of file extensions that should be imported when the CSS is minified.
@@ -155,7 +155,7 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     public function setMaxImportSize(int $size)
     {
         if ($size < 0) {
-            $size = 5;
+            $size = 0;
         }
         
         $this->maxImportSize = $size;
