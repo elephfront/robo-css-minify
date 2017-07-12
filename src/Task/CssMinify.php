@@ -148,9 +148,9 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
     /**
      * Set the maximum file size (in kB) of file that will be embedded in the generated CSS content.
      * Expects a positive integer. If a negative value is passed, the default of '5' will be applied.
-     * 
+     *
      * @param int $size The maximum file size (in kB) of file that will be embedded in the generated CSS content
-     * @return self 
+     * @return self
      */
     public function setMaxImportSize(int $size)
     {
