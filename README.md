@@ -80,6 +80,52 @@ The `setGzipLevel` accepts values from `-1` to `9`. If you use `-1`, the default
 `0` means you do not want any compression and `9` is the maximum level of compression.
 If you use a value that is out of these bounds, the maximum compression level will be used.
 
+## Embedding files
+
+The **robo-css-minify** can embed files directly into the minified CSS. By default, no files will be embedded. You can enable this feature by specifying to the task the maximum size the files (in kB) should have to be imported by using the `setMaxImportSize()` method: 
+
+```php
+    $this
+        ->taskCssMinify([
+            'assets/css/main.css' => 'assets/min/css/main.min.css',
+            'assets/css/home.css' => 'assets/min/css/home.min.css',
+        ])
+        ->setMaxImportSize(5)
+        ->run();
+```
+
+The above code will import as a data string all files that are less that 5kB directly into the minified CSS.
+
+You can also filter the extensions the files should have. By default, if you specify a size, all files having an extension in the following list will be processed (and imported if the size match) :
+
+- gif
+- png
+- jpe
+- jpg
+- jpeg
+- svg
+- woff
+- tif
+- tiff
+- xbm
+
+If you wish to control which extensions should be imported, you can use the `setImportExtensions()` method :
+
+```php
+    $this
+        ->taskCssMinify([
+            'assets/css/main.css' => 'assets/min/css/main.min.css',
+            'assets/css/home.css' => 'assets/min/css/home.min.css',
+        ])
+        ->setMaxImportSize(5)
+        ->setImportExtensions(['jpg', 'png'])
+        ->run();
+```
+
+The above code will only import files that have the `jpg` or `png` extension and that are less that 5kB.
+
+Please note that the only supported file extensions are the one from the list above. 
+
 ## Chained State support
 
 Robo includes a concept called the [Chained State](http://robo.li/collections/#chained-state) that allows tasks that need to work together to be executed in a sequence and pass the state of the execution of a task to the next one.
