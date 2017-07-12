@@ -277,6 +277,38 @@ class CssMinifyTest extends TestCase
     }
 
     /**
+     * Test a basic minification with embedded file in the result file with a limit in the import size.
+     *
+     * @return void
+     */
+    public function testBasicMinificationWithImportedFilesLimitSizeWithNegative()
+    {
+        $basePath = TESTS_ROOT . 'app' . DS . 'css' . DS;
+        $this->task
+            ->setDestinationsMap([
+                $basePath . 'with-images.css' => $basePath . 'output.css'
+            ])
+            ->setMaxImportSize(-15);
+        $result = $this->task->run();
+
+        $this->assertInstanceOf(Result::class, $result);
+        $this->assertEquals(Result::EXITCODE_OK, $result->getExitCode());
+
+        $this->assertEquals(
+            file_get_contents(TESTS_ROOT . 'comparisons' . DS . 'testBasicMinificationWithImportedFiles.css'),
+            file_get_contents($basePath . 'output.css')
+        );
+
+        $source = $basePath . 'with-images.css';
+        $dest = $basePath . 'output.css';
+        $expectedLog = 'Minified CSS from <info>' . $source . '</info> to <info>' . $dest . '</info>';
+        $this->assertEquals(
+            $expectedLog,
+            $this->task->logger()->getLogs()[0]
+        );
+    }
+
+    /**
      * Test a basic minification with embedded files in the result but with specific extensions provided.
      *
      * @return void
