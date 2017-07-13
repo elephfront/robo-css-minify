@@ -47,7 +47,7 @@ class RoboFile extends Tasks
 }
 ```
 
-The only argument the `taskCssMinify()` takes is an array (`$destinationsMap`) which maps the source files to the destination files : it will load the **assets/css/main.css**, do its magic and put the final content in **assets/min/main.min.js** and do the same for all of the other files.
+The only argument the `taskCssMinify()` takes is an array (`$destinationsMap`) which maps the source files to the destination files : it will load the **assets/css/main.css**, do its magic and put the final content in **assets/min/css/main.min.css** and do the same for all of the other files.
 
 ## GZIP compression
 
