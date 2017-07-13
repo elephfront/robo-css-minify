@@ -18,7 +18,7 @@ trait LoadCssMinifyTasksTrait
 {
     
     /**
-     * Exposes the ImportJavascript task.
+     * Exposes the CssMinify task.
      *
      * @param array $destinationMap Key / value pairs array where the key is the source and the value the destination.
      * @return \Elephfront\RoboCssMinify\Task\CssMinify Instance of the CssMinify Task
