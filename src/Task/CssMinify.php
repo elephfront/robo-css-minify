@@ -349,12 +349,6 @@ class CssMinify extends BaseTask implements TaskInterface, Consumer
      */
     protected function execMinify(string $source, string $destination)
     {
-        $destinationDirectory = dirname($destination);
-
-        if (!is_dir($destinationDirectory)) {
-            mkdir($destinationDirectory, 0755, true);
-        }
-
         $this->minifier->setMaxImportSize($this->maxImportSize);
         $this->minifier->setImportExtensions($this->compileImportExtensions());
 
